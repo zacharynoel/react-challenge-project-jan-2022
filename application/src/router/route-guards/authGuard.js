@@ -8,11 +8,11 @@ const AuthGuard = (props) => {
     /**
      * If the user is authenticated, we want to return the child Route
      * components that are wrapped within this AuthGuard. Otherwise,
-     * we want to redirect the user back to the welcome page.
+     * we want to redirect the user back to the login page.
      */
     return auth.token
         ? props.children
-        : <Redirect to="/" />
+        : <Redirect to="/login" />
 }
 
 export default AuthGuard;
