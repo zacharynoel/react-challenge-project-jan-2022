@@ -1,4 +1,16 @@
 import { SERVER_IP } from '../../private'
+import { CURRENT_ORDERS } from './types';
+
+const finishRetrievingOrders = (orders) => {
+    return {
+        type: CURRENT_ORDERS,
+        payload: {
+            orders
+        }
+    }
+}
+
+// actions below
 
 export const addOrder = (order_item, quantity, ordered_by) => {
     return() => {
@@ -48,4 +60,18 @@ export const deleteOrder = (id) => {
             },
         }).then(response => response.json())
     };
+}
+
+export const currentOrders = () => {
+    return (dispatch) => {
+        fetch(`${SERVER_IP}/api/current-orders`)
+            .then(response => response.json())
+            .then(response => {
+                if(response.success) {
+                    dispatch(finishRetrievingOrders(response.orders));
+                } else {
+                    console.log('Error getting orders');
+                }
+            });
+    }
 }
