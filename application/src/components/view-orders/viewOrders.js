@@ -1,23 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { connect, useSelector } from 'react-redux';
 import { Template } from '../../components';
-import { SERVER_IP } from '../../private';
+import { currentOrders } from '../../redux/actions/orderActions';
 import OrdersList from './ordersList';
 import './viewOrders.css';
 
-export default function ViewOrders(props) {
-    const [orders, setOrders] = useState([]);
+const mapActionsToProps = dispatch => ({
+    retrieveCurrentOrders() {
+        dispatch(currentOrders());
+    }
+})
+
+const ViewOrders = (props) => {
+    const { orders } = useSelector((state) => state.orders)
 
     useEffect(() => {
-        fetch(`${SERVER_IP}/api/current-orders`)
-            .then(response => response.json())
-            .then(response => {
-                if(response.success) {
-                    setOrders(response.orders);
-                } else {
-                    console.log('Error getting orders');
-                }
-            });
-    }, [])
+       props.retrieveCurrentOrders();
+    }, [props])
 
     return (
         <Template>
@@ -29,3 +28,5 @@ export default function ViewOrders(props) {
         </Template>
     );
 }
+
+export default connect(null, mapActionsToProps)(ViewOrders);
