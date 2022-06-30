@@ -12,8 +12,8 @@ const finishLogin = (email, token) => {
 }
 
 export const loginUser = (email, password) => {
-    return (dispatch) => {
-        fetch(`${SERVER_IP}/api/login`, {
+    return async (dispatch) => {
+        return fetch(`${SERVER_IP}/api/login`, {
             method: 'POST',
             body: JSON.stringify({
                 email,
@@ -27,6 +27,7 @@ export const loginUser = (email, password) => {
             if (response.success) {
                 dispatch(finishLogin(response.email, response.token));
             }
+            return response;
         })
     };
 }
@@ -36,4 +37,22 @@ export const logoutUser = () => {
         type: LOGOUT,
         payload: null,
     }
+}
+
+export const registerUser = (email, password) => {
+    return async () => {
+        return fetch(`${SERVER_IP}/api/register`, {
+            method: 'POST',
+            body: JSON.stringify({
+                email,
+                password
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        }).then(response => response.json())
+        .then(response => {
+            return response;
+        })
+    };
 }

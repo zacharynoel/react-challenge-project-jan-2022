@@ -11,6 +11,9 @@ class Login extends Component {
         <div className="d-flex justify-content-center mt-5">
           <LoginForm onLogin={() => {this.props.history.push('/view-orders')}}/>
         </div>
+        <div className="register-button">
+          <button onClick={() => {this.props.history.push('/register')}} className="btn btn-primary">Register</button>
+        </div>
       </div>
     )
   }

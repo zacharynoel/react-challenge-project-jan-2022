@@ -1,29 +1,29 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux'; 
-import { loginUser } from '../../../redux/actions/authActions'
+import { registerUser } from '../../../redux/actions/authActions';
 
 const mapActionsToProps = dispatch => ({
-  commenceLogin(email, password) {
-    return dispatch(loginUser(email, password))
+  commenceRegister(email, password) {
+    return dispatch(registerUser(email, password))
   }
 })
 
-class LoginForm extends Component {
+class RegisterForm extends Component {
   state = {
     email: "",
     password: "",
   }
 
-  async login(e) {
+  async register(e) {
     e.preventDefault();
-    const response = await this.props.commenceLogin(this.state.email, this.state.password);
+    const response = await this.props.commenceRegister(this.state.email, this.state.password);
 
     if (!response.success) {
-      alert('Failed to login: ' + response.error);
+      alert('Registration failed: ' + response.error);
       return;
     }
 
-    this.props.onLogin();
+    this.props.onRegister();
   }
 
   onChange(key, val) {
@@ -42,11 +42,11 @@ class LoginForm extends Component {
           <input type="password" className="form-control" id="inputPassword" value={this.state.password} onChange={e => this.onChange('password', e.target.value)}></input>
         </div>
         <div className="d-flex justify-content-center">
-            <button onClick={e => this.login(e)} type="submit" className="btn btn-primary">Login</button>
+            <button onClick={e => this.register(e)} type="submit" className="btn btn-primary">Register</button>
         </div>
       </form>
     );
   }
 }
 
-export default connect(null, mapActionsToProps)(LoginForm);
+export default connect(null, mapActionsToProps)(RegisterForm);
