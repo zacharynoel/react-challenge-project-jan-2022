@@ -7,15 +7,9 @@ import './viewOrders.css';
 export default function ViewOrders(props) {
     const [orders, setOrders] = useState([]);
 
-    let duration = 20;
+    const RELOAD_LIMIT = 12;
     let interval = 5;
     let countdown = 0;
-
-    const onDurationChange = (event) => {
-        if (!isNaN(event.target.value)) {
-            duration = event.target.value;
-        }
-    }
 
     const onIntervalChange = (event) => {
         if (!isNaN(event.target.value)) {
@@ -33,6 +27,8 @@ export default function ViewOrders(props) {
             } else {
                 console.log('Error getting orders');
             }
+        }).catch(() => {
+            console.log('Error fetching orders');
         });
 
         // keep track in console each request
@@ -48,12 +44,9 @@ export default function ViewOrders(props) {
             headers: {
                 'Content-Type': 'application/json'
             },
-        })
-
-        if (!duration) {
-            // if duration is not set, default to 20
-            duration = 20;
-        }
+        }).catch(() => {
+            console.log('Error starting live reload mode');
+        });
 
         if (!interval) {
             // if interval is not set, default to 5
@@ -61,14 +54,11 @@ export default function ViewOrders(props) {
         }
 
         // set the countdown to time before starting
-        countdown = duration;
+        countdown = interval * RELOAD_LIMIT;
         document.getElementById("countdown").innerHTML = 'Countdown: ' + countdown;
 
-        // fetch orders once for the initial display, then fetch at the specified interval
-        await fetchOrders();
-
         const commenceRefresh = setInterval(async () => {
-            await fetchOrders();
+            fetchOrders();
         }, interval * 1000);
 
         const commenceCountdown = setInterval(() => {
@@ -83,13 +73,12 @@ export default function ViewOrders(props) {
 
             // stop the countdown
             clearInterval(commenceCountdown);
-        }, duration * 1000)
+        }, interval * RELOAD_LIMIT * 1000)
     }
 
     return (
         <Template>
             <div>
-                <input className="live-reload-input" type="text" id="duration" placeholder="Duration in seconds" onChange={e => onDurationChange(e)}></input>
                 <input className="live-reload-input" type="text" id="duration" placeholder="Interval in seconds" onChange={e => onIntervalChange(e)}></input>
                 <label className="live-reload-countdown" id="countdown">Countdown: {countdown}</label>
             </div>
