@@ -7,63 +7,90 @@ import './viewOrders.css';
 export default function ViewOrders(props) {
     const [orders, setOrders] = useState([]);
 
-    let time = 5;
+    let duration = 20;
+    let interval = 5;
     let countdown = 0;
 
-    const onTimeChange = (event) => {
+    const onDurationChange = (event) => {
         if (!isNaN(event.target.value)) {
-            time = event.target.value;
+            duration = event.target.value;
         }
     }
 
-    const startLiveReload = () => {
-        fetch(`${SERVER_IP}/api/live-mode`, {
+    const onIntervalChange = (event) => {
+        if (!isNaN(event.target.value)) {
+            interval = event.target.value;
+        }
+    }
+
+    const fetchOrders = async () => {
+        // fetch orders
+        await fetch(`${SERVER_IP}/api/current-orders`)
+        .then(response => response.json())
+        .then(response => {
+            if(response.success) {
+                setOrders(response.orders);
+            } else {
+                console.log('Error getting orders');
+            }
+        });
+
+        // keep track in console each request
+        console.log('Fetched orders')
+    }
+    
+    const startLiveReload = async () => {
+        await fetch(`${SERVER_IP}/api/live-mode`, {
             method: 'POST',
             body: JSON.stringify({
-                time
+                time: interval
             }),
+            headers: {
+                'Content-Type': 'application/json'
+            },
         })
-        .then(response => response.json())
 
-        if (!time) {
-            // if time is not set, default to 5
-            time = 5;
+        if (!duration) {
+            // if duration is not set, default to 20
+            duration = 20;
+        }
+
+        if (!interval) {
+            // if interval is not set, default to 5
+            interval = 5;
         }
 
         // set the countdown to time before starting
-        countdown = time;
+        countdown = duration;
         document.getElementById("countdown").innerHTML = 'Countdown: ' + countdown;
 
-        const commenceRefresh = setInterval(() => {
-            // fetch orders
-            fetch(`${SERVER_IP}/api/current-orders`)
-            .then(response => response.json())
-            .then(response => {
-                if(response.success) {
-                    setOrders(response.orders);
-                } else {
-                    console.log('Error getting orders');
-                }
-            });
+        // fetch orders once for the initial display, then fetch at the specified interval
+        await fetchOrders();
 
-            // keep track in console each request
-            console.log('Fetched orders')
+        const commenceRefresh = setInterval(async () => {
+            await fetchOrders();
+        }, interval * 1000);
 
+        const commenceCountdown = setInterval(() => {
             // decrement our countdown
             countdown -= 1;
             document.getElementById("countdown").innerHTML = 'Countdown: ' + countdown;
-        }, 1000);
+        }, 1000)
 
         setTimeout(() => {
             // stop refreshing
             clearInterval(commenceRefresh);
-        }, time * 1000)
+
+            // stop the countdown
+            clearInterval(commenceCountdown);
+        }, duration * 1000)
     }
 
     return (
         <Template>
             <div>
-                <input className="live-reload-duration" type="text" id="duration" placeholder="Duration in seconds" onChange={e => onTimeChange(e)}></input>
+                <input className="live-reload-input" type="text" id="duration" placeholder="Duration in seconds" onChange={e => onDurationChange(e)}></input>
+                <input className="live-reload-input" type="text" id="duration" placeholder="Interval in seconds" onChange={e => onIntervalChange(e)}></input>
                 <label className="live-reload-countdown" id="countdown">Countdown: {countdown}</label>
             </div>
             <button className="start-live-reload-btn" onClick={() => startLiveReload()}>Start Live Reload</button>
